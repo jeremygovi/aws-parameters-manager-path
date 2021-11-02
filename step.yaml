@@ -1,0 +1,123 @@
+version: '1.0'
+kind: step-type
+metadata:
+  name: aws-parameters-manager-path
+  title: Fetch parameters from AWS parameters Manager
+  version: 1.0.0
+  isPublic: true
+  description: Fetch parameters and export them to be used in subsequent steps.
+  sources:
+    - 'https://github.com/easylo/aws-parameters-manager-path'
+  stage: incubating
+  maintainers:
+    - name: Laurent RICHARD
+      email: easylo@gmail.com
+  categories:
+    - aws
+    - parameter management
+  official: true
+  tags: []
+  icon:
+    type: svg
+    url: 'https://d3f44cr96bpmfn.cloudfront.net/aws-parameters-manager.svg'
+    background: '#f4f4f4'
+  examples:
+    - description: using-env-vars
+      workflow:
+        Fetchparameters:
+          title: Fetch parameters from AWS parameters Manager
+          type: aws-parameters-manager-path
+          arguments:
+            AWS_ACCESS_KEY_ID: ${{AWS_ACCESS_KEY_ID}}
+            AWS_parameter_ACCESS_KEY: ${{AWS_parameter_ACCESS_KEY}}
+            AWS_DEFAULT_REGION: a-region-1
+            AWS_IAM_ROLE_ARN: 'arn:aws:role/some-role'
+            PARAMETERS:
+              - parameter_path: parameter-1/path
+                store_to: USERNAME
+              - parameter_path: parameter-2/path
+                store_to: PASSWORD
+    - description: using-service-account
+      workflow:
+        Fetchparameters:
+          title: Fetch parameters from AWS parameters Manager using service account IAM role
+          type: aws-parameters-manager-path
+          arguments:
+            AWS_DEFAULT_REGION: a-region-1
+            PARAMETERS:
+              - parameter_path: parameter-1/path
+                store_to: USERNAME
+              - parameter_path: parameter-2/path
+                store_to: PASSWORD
+  latest: true
+spec:
+  arguments: |-
+    {
+      "definitions": {},
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "type": "object",
+      "additionalProperties": false,
+      "patterns": [],
+      "required": [
+        "PARAMETERS",
+        "AWS_DEFAULT_REGION"
+      ],
+      "properties": {
+        "AWS_ACCESS_KEY_ID": {
+          "type": "string",
+          "description": "AWS access key ID. Takes priority over pod's IAM role if set"
+        },
+        "AWS_parameter_ACCESS_KEY": {
+          "type": "string",
+          "description": "AWS parameter access key."
+        },
+        "AWS_DEFAULT_REGION": {
+          "type": "string",
+          "description": "AWS region to operate in."
+        },
+        "AWS_IAM_ROLE_ARN": {
+          "type": "string",
+          "description": "The ARN of AWS IAM role to assume."
+        },
+        "PARAMETERS": {
+          "type": "array",
+          "description": "A list of parameters to fetch.",
+          "items": {
+            "type": "object",
+            "required": [
+              "parameter_path",
+              "store_to"
+            ],
+            "properties": {
+              "parameter_path": {
+                "type": "string",
+                "description": "ARN or friendly name of the parameter."
+              },
+              "store_to": {
+                "type": "string",
+                "description": "Environment variable to store the parameter value in."
+              }
+            }
+          }
+        }
+      }
+    }
+  stepsTemplate: |-
+    main:
+      name: aws-parameters-manager-path
+      image: laurentrichard/aws-parameters-manager-path:1.0.0
+      environment:
+      [[ range $key, $val := .Arguments ]]
+        [[- if ne $key "parameters" ]]
+        - '[[ $key ]]=[[ $val ]]'
+        [[- end ]]
+      [[- end ]]
+      [[ $parameters := slice ]]
+      [[ range $parameter := .Arguments.parameters ]]
+        [[ $parameter_str := (join (slice $parameter.parameter_path $parameter.key $parameter.store_to) "#") ]]
+        [[ $parameters = (append $parameter_str $parameters) ]]
+      [[ end ]]
+        - 'parameters=[[ join $parameters "|" | trimSpace ]]'
+  delimiters:
+    left: '[['
+    right: ']]'
