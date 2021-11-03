@@ -62,7 +62,7 @@ def assume_role(role_arn):
             WebIdentityToken=webtoken
         )
     else:
-        raise Exception("Cannot authenticate with AWS parameters manager, ensure that you have set environment variables AWS_ACCESS_KEY_ID/AWS_parameter_ACCESS_KEY or AWS_WEB_IDENTITY_TOKEN_FILE")
+        raise Exception("Cannot authenticate with AWS parameters manager, ensure that you have set environment variables AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY or AWS_WEB_IDENTITY_TOKEN_FILE")
 
     return (
             response['Credentials']['AccessKeyId'],
@@ -86,7 +86,7 @@ def get_parameters_by_path(creds, parameter_path):
         client = boto3.client(
             'ssm',
             aws_access_key_id=creds[0],
-            aws_parameter_access_key=creds[1],
+            AWS_SECRET_ACCESS_KEY=creds[1],
             aws_session_token=creds[2]
         )
 
