@@ -90,6 +90,7 @@ def get_parameters_by_path(creds, parameter_path):
             aws_session_token=creds[2]
         )
 
+    print('DEBUG CLIENT {}'.format(client))
     return client.get_parameters_by_path(Path=parameter_path, WithDecryption=True)
 
 
@@ -111,6 +112,10 @@ def main():
     if (aws_iam_role_arn := os.environ.get(AWS_ROLE_ARN)) and should_assume_role(aws_iam_role_arn):
         creds = assume_role(aws_iam_role_arn)
 
+    print('DEBUG CREDS {}'.format(creds))
+
+    print('DEBUG AWS_ACCESS_KEY_ID {}'.format( os.environ.get('AWS_ACCESS_KEY_ID')))
+    print('DEBUG AWS_SECRET_ACCESS_KEY {}'.format( os.environ.get('AWS_SECRET_ACCESS_KEY')))
     parameters = os.environ.get(PARAMETERS) or []
 
     results = []
