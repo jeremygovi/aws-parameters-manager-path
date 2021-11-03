@@ -98,7 +98,6 @@ spec:
                 "type": "string",
                 "description": "Environment variable to store the parameter value in.",
                 "default": ""
-              }
               },
               "target": {
                 "type": "string",
