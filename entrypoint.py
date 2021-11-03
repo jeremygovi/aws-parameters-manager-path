@@ -130,9 +130,9 @@ def main():
 
         print("Storing parameter value for path '{}' into ${}".format(path, store_to))
         ssm_response_data = response['Parameters']
-        print("Response data {}".format(response))
-        for ssm_data in ssm_response_data:
-            parameter_response = json.loads(ssm_data)
+        
+        for parameter_response in ssm_response_data:
+            # parameter_response = json.loads(ssm_data)
             for parameter_string in parameter_response:
                 # Name = parameter_string['Name']
                 # Type = parameter_string['Type']
