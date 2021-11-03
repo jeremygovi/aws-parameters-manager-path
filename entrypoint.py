@@ -86,7 +86,7 @@ def get_parameters_by_path(creds, parameter_path):
         client = boto3.client(
             'ssm',
             aws_access_key_id=creds[0],
-            AWS_SECRET_ACCESS_KEY=creds[1],
+            aws_secret_access_key=creds[1],
             aws_session_token=creds[2]
         )
 
