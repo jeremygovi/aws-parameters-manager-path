@@ -33,10 +33,10 @@ metadata:
             AWS_DEFAULT_REGION: a-region-1
             AWS_IAM_ROLE_ARN: 'arn:aws:role/some-role'
             parameters:
-              - parameter_path: parameter-1/path
+              - parameter_path: /parameter-1/path
                 store_to: USERNAME
-              - parameter_path: parameter-2/path
-                store_to: PASSWORD
+                target: auto
+              - parameter_path: /parameter-2/path
     - description: using-service-account
       workflow:
         FetchParameters:
@@ -45,10 +45,12 @@ metadata:
           arguments:
             AWS_DEFAULT_REGION: a-region-1
             parameters:
-              - parameter_path: parameter-1/path
+              - parameter_path: /parameter-1/path
                 store_to: USERNAME
-              - parameter_path: parameter-2/path
-                store_to: PASSWORD
+                target: environment
+              - parameter_path: /parameter-2/path
+                store_to: /tmp/password.txt
+                target: file
   latest: true
 spec:
   arguments: |-
@@ -85,8 +87,7 @@ spec:
           "items": {
             "type": "object",
             "required": [
-              "parameter_path",
-              "store_to"
+              "parameter_path"
             ],
             "properties": {
               "parameter_path": {
@@ -95,7 +96,14 @@ spec:
               },
               "store_to": {
                 "type": "string",
-                "description": "Environment variable to store the parameter value in."
+                "description": "Environment variable to store the parameter value in.",
+                "default": ""
+              }
+              },
+              "target": {
+                "type": "string",
+                "description": "How to store the parameter value in.",
+                "default": "auto"
               }
             }
           }
@@ -114,7 +122,7 @@ spec:
       [[- end ]]
       [[ $parameters := slice ]]
       [[ range $parameter := .Arguments.parameters ]]
-        [[ $parameter_str := (join (slice $parameter.parameter_path $parameter.store_to) "#") ]]
+        [[ $parameter_str := (join (slice $parameter.parameter_path $parameter.store_to $parameter.target ) "#") ]]
         [[ $parameters = (append $parameter_str $parameters) ]]
       [[ end ]]
         - 'PARAMETERS=[[ join $parameters "|" | trimSpace ]]'

@@ -106,7 +106,10 @@ def write_to_cf_volume(results):
     Write environment variables that are to be exported in
     Codefresh.
     """
-    with io.open('/meta/env_vars_to_export', 'a') as file:
+    write_to_file('/meta/env_vars_to_export', results )
+
+def write_to_file(file, results):
+    with io.open(file, 'a') as file:
         file.writelines(results)
 
 
@@ -124,21 +127,36 @@ def main():
     results = []
 
     for parameter in parameters.split('|'):
-        path, store_to = parameter.split('#')
+        config_item_number = parameter.count('#')
+        if config_item_number == 2 :
+            path, store_to, target = parameter.split('#')
+        elif config_item_number == 1 :
+            target = 'environment'
+            path, store_to = parameter.split('#')
+        elif config_item_number == 0 :
+            target = 'auto'
+            store_to = ''
+            path = parameter
+        
 
         response = get_parameters_by_path(creds, path)
 
         print("Storing parameter value for path '{}' into ${}".format(path, store_to))
-        ssm_response_data = response['Parameters']
-        
-        for parameter_response in ssm_response_data:
-            # parameter_response = json.loads(ssm_data)
-            for parameter_string in parameter_response:
-                # Name = parameter_string['Name']
-                # Type = parameter_string['Type']
-                value = parameter_string['Value']
+        parameter_response = response['Parameters']
 
-                results.append('{}={}\n'.format(store_to, value))
+        for parameter_string in parameter_response:            
+            # Type = parameter_string['Type']
+            Value = parameter_string['Value']
+
+            if target == "file":
+                write_to_file(store_to, Value )
+
+            elif target == "auto":
+                Name = parameter_string['Name'].replace('/','_').lower()
+                results.append('{}={}\n'.format(Name, Value))
+
+            elif target == "environment":
+                results.append('{}={}\n'.format(store_to, Value))
 
     write_to_cf_volume(results)
 
