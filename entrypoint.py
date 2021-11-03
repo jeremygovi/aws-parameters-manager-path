@@ -66,7 +66,7 @@ def assume_role(role_arn):
 
     return (
             response['Credentials']['AccessKeyId'],
-            response['Credentials']['parameterAccessKey'],
+            response['Credentials']['SecretAccessKey'],
             response['Credentials']['SessionToken']
         )
 
@@ -122,7 +122,7 @@ def main():
 
         print("Storing parameter value for path '{}' into ${}".format(path, store_to))
         ssm_response_data = response['Parameters']
-        print("Response data {}".format(ssm_response_data))
+        print("Response data {}".format(response))
         for ssm_data in ssm_response_data:
             parameter_response = json.loads(ssm_data)
             for parameter_string in parameter_response:
