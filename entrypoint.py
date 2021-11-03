@@ -121,13 +121,16 @@ def main():
         response = get_parameters_by_path(creds, path)
 
         print("Storing parameter value for path '{}' into ${}".format(path, store_to))
-        parameter_response = json.loads(response['Parameters'][0])
-        for parameter_string in parameter_response:
-            # Name = parameter_string['Name']
-            # Type = parameter_string['Type']
-            value = parameter_string['Value']
+        ssm_response_data = response['Parameters']
+        print("Response data {}".format(ssm_response_data))
+        for ssm_data in ssm_response_data:
+            parameter_response = json.loads(ssm_data)
+            for parameter_string in parameter_response:
+                # Name = parameter_string['Name']
+                # Type = parameter_string['Type']
+                value = parameter_string['Value']
 
-            results.append('{}={}\n'.format(store_to, value))
+                results.append('{}={}\n'.format(store_to, value))
 
     write_to_cf_volume(results)
 
