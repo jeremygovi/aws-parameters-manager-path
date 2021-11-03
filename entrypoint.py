@@ -121,7 +121,7 @@ def main():
         response = get_parameters_by_path(creds, path)
 
         print("Storing parameter value for path '{}' into ${}".format(path, store_to))
-        parameter_response = json.loads(response['Parameters'])
+        parameter_response = json.loads(response['Parameters'][0])
         for parameter_string in parameter_response:
             # Name = parameter_string['Name']
             # Type = parameter_string['Type']
