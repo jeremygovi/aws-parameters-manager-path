@@ -112,6 +112,10 @@ def write_to_file(file, results):
     with io.open(file, 'a') as file:
         file.writelines(results)
 
+def check_dir(folder):
+    if not os.path.isdir(folder):
+        print("Folder doesn't exists: {}".format(folder))
+        os.mkdir(folder)
 
 def main():
     """
@@ -149,10 +153,12 @@ def main():
             Value = parameter_string['Value']
 
             if target == "file":
+                folder = os.path.dirname(store_to)
+                check_dir(folder)
                 write_to_file(store_to, Value )
 
             elif target == "auto":
-                Name = parameter_string['Name'].replace('/','_').lower()
+                Name = parameter_string['Name'].replace('/','_').upper()
                 results.append('{}={}\n'.format(Name, Value))
 
             elif target == "environment":
